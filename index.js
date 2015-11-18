@@ -26,7 +26,7 @@ var pyjade = function(options) {
                 return;
             }
             file.contents = new Buffer(stdout);
-            file.path = gutil.replaceExtension(file.path, '.html');
+            file.path = gutil.replaceExtension(file.path, (options.extension || '.html'));
             stream.push(file);
             callback();
         });
