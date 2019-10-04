@@ -3,7 +3,7 @@ var gutil = require('gulp-util');
 var through = require('through2');
 var exec = require('child_process').exec;
 
-var pyjade = function(options) {
+var pypugjs = function(options) {
     if(options === undefined) {
         options = {};
     }
@@ -15,13 +15,13 @@ var pyjade = function(options) {
             return;
         }
         if(file.isStream()) {
-            stream.emit('error', new gutil.PluginError('gulp-pyjade', 'Streams are not supported'));
+            stream.emit('error', new gutil.PluginError('gulp-pypugjs', 'Streams are not supported'));
             callback();
             return;
         }
-        var command = exec('pyjade -c ' + (options.engine || 'django'), function(error, stdout, stderr) {
+        var command = exec('pypugjs -c ' + (options.engine || 'django'), function(error, stdout, stderr) {
             if(error) {
-                stream.emit('error', new gutil.PluginError('gulp-pyjade', error));
+                stream.emit('error', new gutil.PluginError('gulp-pypugjs', error));
                 callback();
                 return;
             }
@@ -39,4 +39,4 @@ var pyjade = function(options) {
     });
 }
 
-module.exports = pyjade;
+module.exports = pypugjs;

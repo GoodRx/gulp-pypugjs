@@ -1,7 +1,8 @@
 {
-  "name": "gulp-pyjade",
+  "name": "gulp-pypugjs",
   "version": "0.0.1",
-  "description": "Pyjade plugin for gulp",
+  "description": "pypugjs plugin for gulp",
+  "private": true,
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,9 +13,9 @@
     "gulp-util": "^3.0.1",
     "through2": "^0.6.3"
   },
-  "homepage": "https://github.com/htch/gulp-pyjade",
+  "homepage": "https://github.com/GoodRx/gulp-pypugjs",
   "repository": {
     "type": "git",
-    "url": "https://github.com/htch/gulp-pyjade.git"
+    "url": "https://github.com/GoodRx/gulp-pypugjs.git"
   }
 }
