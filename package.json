@@ -11,7 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "gulp-util": "^3.0.1",
-    "through2": "^0.6.3"
+    "plexer": "^2.0.0"
   },
   "homepage": "https://github.com/GoodRx/gulp-pypugjs",
   "repository": {

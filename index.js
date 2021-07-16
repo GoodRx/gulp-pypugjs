@@ -1,42 +1,61 @@
-var gulp = require('gulp');
+var cp = require('child_process');
+var Stream = require('stream');
+
 var gutil = require('gulp-util');
-var through = require('through2');
-var exec = require('child_process').exec;
+var Duplexer = require('plexer');
 
 var pypugjs = function(options) {
-    if(options === undefined) {
-        options = {};
+    options = options || {};
+
+    var stream = new Stream.PassThrough({ objectMode: true });
+
+    stream._transform = function(file, _, cb) {
+        if (file.isNull()) {
+            stream.push(file);
+            return cb();
+        }
+
+        var spawnOpts = ['-c'].concat(options.engine ? options.engine.split(' ') : ['django']);
+        var program = cp.spawn('pypugjs', spawnOpts, { cwd: '.' });
+
+        if (file.contents instanceof Buffer) {
+            var newBuffer = new Buffer(0);
+
+            program.stdout.on('readable', function () {
+                var chunk;
+                while ((chunk = program.stdout.read())) {
+                    newBuffer = Buffer.concat(
+                      [newBuffer, chunk],
+                      newBuffer.length + chunk.length
+                    );
+                }
+            });
+
+            program.stdout.on('end', function () {
+                if (options.newline) {
+                    newBuffer = Buffer.concat([newBuffer, new Buffer('\n')]);
+                }
+
+                file.path = gutil.replaceExtension(file.path, (options.extension || '.html'));
+                file.contents = newBuffer;
+                stream.push(file);
+                cb();
+            });
+
+            program.stdin.write(file.contents, function () {
+                program.stdin.end();
+            });
+        } else {
+            file.contents = file.contents.pipe(
+              new Duplexer(program.stdin, program.stdout)
+            );
+
+            stream.push(file);
+            cb();
+        }
     }
-    return through.obj(function(file, enc, callback) {
-        var stream = this;
-        if(file.isNull()) {
-            stream.push(file);
-            callback();
-            return;
-        }
-        if(file.isStream()) {
-            stream.emit('error', new gutil.PluginError('gulp-pypugjs', 'Streams are not supported'));
-            callback();
-            return;
-        }
-        var command = exec('pypugjs -c ' + (options.engine || 'django'), function(error, stdout, stderr) {
-            if(error) {
-                stream.emit('error', new gutil.PluginError('gulp-pypugjs', error));
-                callback();
-                return;
-            }
-            var buffer = new Buffer(stdout);
-            if (options.newline) {
-                buffer = Buffer.concat([buffer, new Buffer('\n')]);
-            }
-            file.contents = buffer;
-            file.path = gutil.replaceExtension(file.path, (options.extension || '.html'));
-            stream.push(file);
-            callback();
-        });
-        command.stdin.write(file.contents);
-        command.stdin.end();
-    });
+
+    return stream;
 }
 
 module.exports = pypugjs;
